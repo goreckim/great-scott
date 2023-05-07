@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "great-scott"
+version = "0.1.0"
+description = "Automatically reverses Django migrations when changing git branches"
+authors = ["Marcin Górecki <marcin.gorecki@hey.com>"]
+maintainers = ["Marcin Górecki <marcin.gorecki@hey.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/goreckim/great-scott"
+repository = "https://github.com/goreckim/great-scott"
+keywords = ["Django", "migrations", "git"]
+classifiers = [
+    "Environment :: Console",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Utilities",
+]
+include = [
+    "LICENSE",
+]
+packages = [{include = "great_scott"}]
+
+
+[tool.poetry.scripts]
+great-scott = "great_scott.__main__:main"
+
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
