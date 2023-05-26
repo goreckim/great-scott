@@ -63,7 +63,6 @@ def find_youngest_shared_migration(list1: list[str], list2: list[str]) -> str:
         if migration1 != migration2:
             break
         youngest = migration1.split("_", 1)[0]
-
     return youngest
 
 

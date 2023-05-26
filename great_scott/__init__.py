@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-import shutil
 import subprocess
 import sys
 from typing import NoReturn
 
 
 __version__ = "0.1.0"
-
-
-COLS = shutil.get_terminal_size().columns
 
 
 class RunException(Exception):
@@ -33,7 +29,6 @@ def run(command: str, *args: str) -> str | None:
     sp = subprocess.run([command, *args], capture_output=True, text=True)
     if sp.returncode != 0:
         raise RunException(sp.stderr)
-
     return sp.stdout
 
 
