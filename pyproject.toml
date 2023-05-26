@@ -34,6 +34,41 @@ great-scott = "great_scott.__main__:main"
 python = ">=3.8,<4.0"
 
 
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.3.2"
+
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+line-length = 88
+select = [
+    "A",
+    "ANN",
+    "BLE",
+    "E",
+    "F",
+    "FA",
+    "TCH",
+    "W",
+]
+
+
+[tool.black]
+line_length = 88
+
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+force_grid_wrap = 2
+indent = 4
+use_parentheses = true
+include_trailing_comma = true
+lines_after_imports = 2
+combine_as_imports = true
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]

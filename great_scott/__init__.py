@@ -13,16 +13,16 @@ class RunException(Exception):
 
 
 class TEXT:
-   PURPLE = '\033[95m'
-   CYAN = '\033[96m'
-   DARKCYAN = '\033[36m'
-   BLUE = '\033[94m'
-   GREEN = '\033[92m'
-   YELLOW = '\033[93m'
-   RED = '\033[91m'
-   BOLD = '\033[1m'
-   UNDERLINE = '\033[4m'
-   END = '\033[0m'
+    PURPLE = "\033[95m"
+    CYAN = "\033[96m"
+    DARKCYAN = "\033[36m"
+    BLUE = "\033[94m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+    END = "\033[0m"
 
 
 def run(command: str, *args: str) -> str | None:
@@ -37,7 +37,7 @@ def fail(msg: str, status: int = 1) -> NoReturn:
     exit(status)
 
 
-def info(msg: str, delete_last_line=False):
+def info(msg: str, delete_last_line: bool = False) -> None:
     if delete_last_line:
-        sys.stdout.write('\x1b[1A\x1b[2K')
+        sys.stdout.write("\x1b[1A\x1b[2K")
     print(f"{msg}")

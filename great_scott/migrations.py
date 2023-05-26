@@ -1,15 +1,19 @@
 from __future__ import annotations
 
-import argparse
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
 from . import (
-    RunException,
     TEXT,
+    RunException,
     fail,
     info,
     run,
 )
+
+
+if TYPE_CHECKING:
+    import argparse
 
 
 def django_available() -> bool:
@@ -66,7 +70,7 @@ def find_youngest_shared_migration(list1: list[str], list2: list[str]) -> str:
     return youngest
 
 
-def reverse_migrations(args: argparse.Namespace):
+def reverse_migrations(args: argparse.Namespace) -> None:
     if not django_available():
         fail("Django not found, won't reverse any migrations 🤷")
 
@@ -105,7 +109,9 @@ def reverse_migrations(args: argparse.Namespace):
             # there is no need to perform expensive reversals
             continue
 
-        info(f"⚠️ reversing migrations for {TEXT.BOLD}{app}{TEXT.END} (up to {youngest})")
+        info(
+            f"⚠️ reversing migrations for {TEXT.BOLD}{app}{TEXT.END} (up to {youngest})"
+        )
         try:
             run("python", "manage.py", "migrate", app, youngest)
         except RunException as ex:

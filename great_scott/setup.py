@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import argparse
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from . import (
     RunException,
@@ -10,6 +10,10 @@ from . import (
     info,
     run,
 )
+
+
+if TYPE_CHECKING:
+    import argparse
 
 
 gs_pre_checkout_template = """#!/usr/bin/env bash
@@ -44,14 +48,14 @@ def get_git_hooks_path() -> Path:
         return (
             Path(run("git", "rev-parse", "--show-toplevel").strip()) / ".git" / "hooks"
         )
-    except RunException as ex:
+    except RunException:
         fail(
             "fatal: not a git repository (or any of the parent directories), "
             "quitting..."
         )
 
 
-def _install_post_checkout(git_hooks_path: Path):
+def _install_post_checkout(git_hooks_path: Path) -> None:
     """Install post-checkout script"""
     post_checkout_path = git_hooks_path / "post-checkout"
     if not post_checkout_path.exists():
@@ -62,7 +66,7 @@ def _install_post_checkout(git_hooks_path: Path):
         post_checkout_path.chmod(0o755)
         return
 
-    with open(post_checkout_path, "r") as f:
+    with open(post_checkout_path) as f:
         post_checkout_script_lines = list(map(lambda s: s.strip(), f.readlines()))
 
     if (
@@ -81,13 +85,13 @@ def _install_post_checkout(git_hooks_path: Path):
         f.write("\n".join(post_checkout_script_lines) + "\n")
 
 
-def _uninstall_post_checkout(git_hooks_path: Path):
+def _uninstall_post_checkout(git_hooks_path: Path) -> None:
     """Remove call to pre-checkout from post-checkout script"""
     post_checkout_path = git_hooks_path / "post-checkout"
     if not post_checkout_path.exists():
         return
 
-    with open(post_checkout_path, "r") as f:
+    with open(post_checkout_path) as f:
         post_checkout_script_lines = list(map(lambda s: s.strip(), f.readlines()))
 
     try:
@@ -99,7 +103,7 @@ def _uninstall_post_checkout(git_hooks_path: Path):
         f.write("\n".join(post_checkout_script_lines) + "\n")
 
 
-def _install_pre_checkout(git_hooks_path: Path):
+def _install_pre_checkout(git_hooks_path: Path) -> None:
     """Install pre-checkout script"""
     pre_checkout_path = git_hooks_path / "gs-pre-checkout"
     with open(pre_checkout_path, "w") as f:
@@ -111,14 +115,14 @@ def _install_pre_checkout(git_hooks_path: Path):
     pre_checkout_path.chmod(0o755)
 
 
-def _uninstall_pre_checkout(git_hooks_path: Path):
+def _uninstall_pre_checkout(git_hooks_path: Path) -> None:
     """Remove gs-pre-checkout script"""
     pre_checkout_path = git_hooks_path / "gs-pre-checkout"
     if pre_checkout_path.exists():
         pre_checkout_path.unlink()
 
 
-def install(args: argparse.Namespace):
+def install(args: argparse.Namespace) -> None:
     info("Installing git hooks...")
     if not script_path.exists():
         fail(f"{script_path} script does not exist, quitting...")
@@ -131,7 +135,7 @@ def install(args: argparse.Namespace):
     info("git hooks installed!", delete_last_line=True)
 
 
-def uninstall(args: argparse.Namespace):
+def uninstall(args: argparse.Namespace) -> None:
     info("Uninstalling git hooks...")
     git_hooks_path = get_git_hooks_path()
 

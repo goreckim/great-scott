@@ -7,7 +7,7 @@ from .setup import (
 )
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         prog="great-scott",
         description="A simple tool to automatically, "
