@@ -20,7 +20,7 @@ def django_available() -> bool:
     return True
 
 
-def get_django_apps() -> set:
+def get_django_apps() -> set[str]:
     try:
         return set(
             run(
