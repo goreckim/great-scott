@@ -42,7 +42,7 @@
 Reversing migrations should simply work when the GIT branch is changed:
 
 ```sh
-$ git checkout mig-test
+$ git checkout main
 Switched to branch 'main'
 👀 Looking for migrations to reverse on mig-test...
 ⚠️ reversing migrations for importer (up to 0015)
