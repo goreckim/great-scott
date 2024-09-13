@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import importlib.metadata
 import subprocess
 import sys
 from typing import NoReturn
 
 
-__version__ = "0.1.0"
+__version__ = importlib.metadata.version("great-scott")
 
 
 class RunException(Exception):

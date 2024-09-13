@@ -1,5 +1,6 @@
 import argparse
 
+from . import __version__
 from .migrations import reverse_migrations
 from .setup import (
     install,
@@ -14,6 +15,14 @@ def main() -> None:
         "when changing git branches, "
         "reverse migrations in a Django application.",
     )
+
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+    )
+
     sp = parser.add_subparsers()
 
     sp_install = sp.add_parser("install", help="Installs git hooks")

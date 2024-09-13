@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "great-scott"
-version = "0.1.0"
+version = "0.1.1"
 description = "Automatically reverses Django migrations when changing git branches"
 authors = ["Marcin Górecki <marcin.gorecki@hey.com>"]
 maintainers = ["Marcin Górecki <marcin.gorecki@hey.com>"]
@@ -36,6 +36,7 @@ python = ">=3.8,<4.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.3.2"
+setuptools = ">=70.0.0"
 
 
 [build-system]

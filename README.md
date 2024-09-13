@@ -18,7 +18,7 @@
 `great-scott` can be installed in 2 easy steps:
 
 1. **Install the tool**
- 
+
    I recommend installing via [pipx](https://github.com/pypa/pipx):
    ```sh
    pipx install great-scott
