@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "great-scott"
-version = "0.1.2"
+version = "0.1.3"
 description = "Automatically reverses Django migrations when changing git branches"
 authors = ["Marcin Górecki <marcin.gorecki@hey.com>"]
 maintainers = ["Marcin Górecki <marcin.gorecki@hey.com>"]
