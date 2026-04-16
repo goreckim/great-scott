@@ -18,14 +18,6 @@ if TYPE_CHECKING:
     import argparse
 
 
-def django_available() -> bool:
-    try:
-        run("python", "-m", "django", "--version")
-    except RunException:
-        return False
-    return True
-
-
 def get_django_apps() -> set[str]:
     try:
         return set(
@@ -40,13 +32,13 @@ def get_django_apps() -> set[str]:
             .strip()
             .split(",")
         )
-    except RunException as ex:
-        fail(str(ex))
+    except RunException:
+        return set()
 
 
 def get_migrations(branch: str) -> defaultdict[str, list[str]]:
     try:
-        files = sorted(run("git", "ls-tree", "-r", "--name-only", branch).split())
+        files = run("git", "ls-tree", "-r", "--name-only", branch).split()
     except RunException as ex:
         fail(str(ex))
 
@@ -61,15 +53,13 @@ def get_migrations(branch: str) -> defaultdict[str, list[str]]:
 
 
 def find_youngest_shared_migration(list1: list[str], list2: list[str]) -> str:
-    common = list(takewhile(lambda pair: pair[0] == pair[1], zip(list1, list2)))
-    if not common:
-        return "zero"
-    return common[-1][0].split("_", 1)[0]
+    youngest = "zero"
+    for m1, _ in takewhile(lambda pair: pair[0] == pair[1], zip(list1, list2)):
+        youngest = m1.split("_", 1)[0]
+    return youngest
 
 
 def reverse_migrations(args: argparse.Namespace) -> None:
-    if not django_available():
-        fail("Django not found, won't reverse any migrations 🤷")
 
     try:
         current_branch = run("git", "rev-parse", "--abbrev-ref", "HEAD").strip()
@@ -81,6 +71,8 @@ def reverse_migrations(args: argparse.Namespace) -> None:
 
     info("Getting a list of Django applications...")
     available_apps = get_django_apps()
+    if not available_apps:
+        fail("Django not found, won't reverse any migrations 🤷")
 
     all_current_migrations = get_migrations(current_branch)
     all_dest_migrations = get_migrations(args.dst_branch)

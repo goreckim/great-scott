@@ -5,8 +5,8 @@ import pytest
 
 from great_scott import RunException
 from great_scott.migrations import (
-    django_available,
     find_youngest_shared_migration,
+    get_django_apps,
     get_migrations,
     reverse_migrations,
 )
@@ -76,14 +76,16 @@ class TestGetMigrations:
                 get_migrations("nonexistent-branch")
 
 
-class TestDjangoAvailable:
-    def test_returns_true_when_django_found(self):
-        with patch("great_scott.migrations.run", return_value="4.2.0\n"):
-            assert django_available() is True
+class TestGetDjangoApps:
+    def test_returns_apps_when_django_available(self):
+        with patch("great_scott.migrations.run", return_value="app1,app2\n"):
+            result = get_django_apps()
+        assert result == {"app1", "app2"}
 
-    def test_returns_false_when_run_raises(self):
+    def test_returns_empty_set_when_django_not_available(self):
         with patch("great_scott.migrations.run", side_effect=RunException("")):
-            assert django_available() is False
+            result = get_django_apps()
+        assert result == set()
 
 
 class TestReverseMigrations:
@@ -93,11 +95,7 @@ class TestReverseMigrations:
         return args
 
     def test_does_nothing_when_already_on_dst_branch(self):
-        with patch(
-            "great_scott.migrations.run", return_value="main\n"
-        ) as mock_run, patch(
-            "great_scott.migrations.django_available", return_value=True
-        ):
+        with patch("great_scott.migrations.run", return_value="main\n") as mock_run:
             reverse_migrations(self._make_args("main"))
         assert mock_run.call_count == 1
 
@@ -115,11 +113,13 @@ class TestReverseMigrations:
             return ""
 
         with patch("great_scott.migrations.run", side_effect=fake_run), patch(
-            "great_scott.migrations.django_available", return_value=True
-        ), patch("great_scott.migrations.get_django_apps", return_value={"app"}):
+            "great_scott.migrations.get_django_apps", return_value={"app"}
+        ):
             reverse_migrations(self._make_args("main"))
 
     def test_exits_when_django_not_available(self):
-        with patch("great_scott.migrations.django_available", return_value=False):
+        with patch("great_scott.migrations.run", return_value="feature\n"), patch(
+            "great_scott.migrations.get_django_apps", return_value=set()
+        ):
             with pytest.raises(SystemExit):
                 reverse_migrations(self._make_args("main"))
