@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from itertools import takewhile
+from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
 
 from . import (
-    TEXT,
+    Ansi,
     RunException,
     fail,
     info,
@@ -33,7 +35,7 @@ def get_django_apps() -> set[str]:
                 "shell",
                 "-c",
                 "from django.apps import apps; "
-                "print(','.join(list(apps.app_configs.keys())))",
+                "print(','.join(apps.app_configs.keys()))",
             )
             .strip()
             .split(",")
@@ -48,26 +50,21 @@ def get_migrations(branch: str) -> defaultdict[str, list[str]]:
     except RunException as ex:
         fail(str(ex))
 
-    app_to_migrations = defaultdict(list)
+    app_to_migrations: defaultdict[str, list[str]] = defaultdict(list)
     for path in files:
-        if "/migrations/" not in path:
+        p = PurePosixPath(path)
+        if p.parent.name != "migrations" or p.name == "__init__.py":
             continue
-        app, migration = path.split("/migrations/")
-        app = app.split("/")[-1]
-        if migration == "__init__.py":
-            continue
-        app_to_migrations[app].append(migration)
+        app_to_migrations[p.parent.parent.name].append(p.name)
 
     return app_to_migrations
 
 
 def find_youngest_shared_migration(list1: list[str], list2: list[str]) -> str:
-    youngest = "zero"
-    for migration1, migration2 in zip(list1, list2):
-        if migration1 != migration2:
-            break
-        youngest = migration1.split("_", 1)[0]
-    return youngest
+    common = list(takewhile(lambda pair: pair[0] == pair[1], zip(list1, list2)))
+    if not common:
+        return "zero"
+    return common[-1][0].split("_", 1)[0]
 
 
 def reverse_migrations(args: argparse.Namespace) -> None:
@@ -80,7 +77,6 @@ def reverse_migrations(args: argparse.Namespace) -> None:
         fail(str(ex))
 
     if current_branch == args.dst_branch:
-        # no need to reverse if the current branch is the destination branch
         return
 
     info("Getting a list of Django applications...")
@@ -91,26 +87,24 @@ def reverse_migrations(args: argparse.Namespace) -> None:
 
     info(
         f"👀 Looking for migrations to reverse on "
-        f"{TEXT.UNDERLINE}{current_branch}{TEXT.END}...",
+        f"{Ansi.UNDERLINE}{current_branch}{Ansi.END}...",
         delete_last_line=True,
     )
     migrations_reversed = 0
     for app, current_migrations in all_current_migrations.items():
         if app not in available_apps:
-            # additional check against migration files for an application not
-            # registered in the project.
             continue
 
         dest_migrations = all_dest_migrations[app]
         youngest = find_youngest_shared_migration(current_migrations, dest_migrations)
 
-        if current_migrations[-1].startswith(youngest):
-            # for a given application the last migration is the same on both branches,
-            # there is no need to perform expensive reversals
+        last_migration_number = current_migrations[-1].split("_", 1)[0]
+        if last_migration_number == youngest:
             continue
 
         info(
-            f"⚠️ reversing migrations for {TEXT.BOLD}{app}{TEXT.END} (up to {youngest})"
+            f"⚠️ reversing migrations for "
+            f"{Ansi.BOLD}{app}{Ansi.END} (up to {youngest})"
         )
         try:
             run("python", "manage.py", "migrate", app, youngest)
@@ -124,6 +118,5 @@ def reverse_migrations(args: argparse.Namespace) -> None:
             f"I have reversed migrations for {migrations_reversed} "
             f"app{'s' if migrations_reversed > 1 else ''}!"
         )
-
     else:
         info("Great Scott! No migrations to reverse!", delete_last_line=True)

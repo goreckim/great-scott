@@ -13,7 +13,7 @@ class RunException(Exception):
     pass
 
 
-class TEXT:
+class Ansi:
     PURPLE = "\033[95m"
     CYAN = "\033[96m"
     DARKCYAN = "\033[36m"
@@ -26,7 +26,7 @@ class TEXT:
     END = "\033[0m"
 
 
-def run(command: str, *args: str) -> str | None:
+def run(command: str, *args: str) -> str:
     sp = subprocess.run([command, *args], capture_output=True, text=True)
     if sp.returncode != 0:
         raise RunException(sp.stderr)

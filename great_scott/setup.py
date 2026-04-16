@@ -59,30 +59,27 @@ def _install_post_checkout(git_hooks_path: Path) -> None:
     """Install post-checkout script"""
     post_checkout_path = git_hooks_path / "post-checkout"
     if not post_checkout_path.exists():
-        with open(post_checkout_path, "w") as f:
-            f.write(
-                post_checkout_template.format(invoke_pre_checkout=invoke_pre_checkout)
-            )
+        post_checkout_path.write_text(
+            post_checkout_template.format(invoke_pre_checkout=invoke_pre_checkout)
+        )
         post_checkout_path.chmod(0o755)
         return
 
-    with open(post_checkout_path) as f:
-        post_checkout_script_lines = list(map(lambda s: s.strip(), f.readlines()))
+    post_checkout_script_lines = [
+        line.strip() for line in post_checkout_path.read_text().splitlines()
+    ]
 
-    if (
-        not post_checkout_script_lines[0].startswith("#!")
-        or "/bin/sh" not in post_checkout_script_lines[0]
+    if not post_checkout_script_lines[0].startswith("#!") or (
+        "/bin/sh" not in post_checkout_script_lines[0]
         and "bash" not in post_checkout_script_lines[0]
     ):
         fail("post-checkout is not a bash or a sh script, quitting...")
 
     if invoke_pre_checkout in post_checkout_script_lines:
-        # call is already in the script
         return
 
     post_checkout_script_lines.insert(1, invoke_pre_checkout)
-    with open(post_checkout_path, "w") as f:
-        f.write("\n".join(post_checkout_script_lines) + "\n")
+    post_checkout_path.write_text("\n".join(post_checkout_script_lines) + "\n")
 
 
 def _uninstall_post_checkout(git_hooks_path: Path) -> None:
@@ -91,27 +88,24 @@ def _uninstall_post_checkout(git_hooks_path: Path) -> None:
     if not post_checkout_path.exists():
         return
 
-    with open(post_checkout_path) as f:
-        post_checkout_script_lines = list(map(lambda s: s.strip(), f.readlines()))
+    post_checkout_script_lines = [
+        line.strip() for line in post_checkout_path.read_text().splitlines()
+    ]
 
     try:
         post_checkout_script_lines.remove(invoke_pre_checkout)
     except ValueError:
         return
 
-    with open(post_checkout_path, "w") as f:
-        f.write("\n".join(post_checkout_script_lines) + "\n")
+    post_checkout_path.write_text("\n".join(post_checkout_script_lines) + "\n")
 
 
 def _install_pre_checkout(git_hooks_path: Path) -> None:
     """Install pre-checkout script"""
     pre_checkout_path = git_hooks_path / "gs-pre-checkout"
-    with open(pre_checkout_path, "w") as f:
-        f.write(
-            gs_pre_checkout_template.format(
-                script_path=script_path,
-            )
-        )
+    pre_checkout_path.write_text(
+        gs_pre_checkout_template.format(script_path=script_path)
+    )
     pre_checkout_path.chmod(0o755)
 
 
